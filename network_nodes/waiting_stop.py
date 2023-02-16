@@ -1,14 +1,15 @@
 import socket
-
+import config
 
 
 # Create a TCP/IP socket
 sock = socket.socket( socket.AF_INET , socket.SOCK_STREAM)
 
 # Bind the socket to the port
-server_address = ('localhost', 10000)
+stop_port = config.stop_port
+server_address = ('localhost', stop_port)
 print('Starting up on {} port {}'.format(*server_address))
-sock.bind(('', 10000))
+sock.bind(('', stop_port))
 
 # Listen for incoming connections
 sock.listen(2) 

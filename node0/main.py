@@ -3,10 +3,10 @@ import pathlib
 import pandas as pd 
 import time
 import csv
+import config
 
-
-path = '/users/seba/logs'
-file_list = os.listdir(path)
+logs_path = config.logs_path
+file_list = os.listdir(logs_path)
 
 # while len(address_list) == len(file_list):
 
@@ -14,7 +14,7 @@ file_list = os.listdir(path)
    
     
 
-os.chdir(path)
+os.chdir(logs_path)
 # Open file3 in write mode to merge all packets
 with open('merged_packets.csv', 'w') as outfile:
   
@@ -33,7 +33,7 @@ dataFrame = pd.read_csv ("merged_packets.csv", header= None , dtype= str)
 dataFrame.sort_values( 0 , axis=0, ascending=True,inplace=True, na_position='first')
 dataFrame.to_csv ('sorted_merged_packets.csv' , index = False)
 
-# sorce _ destination _ lists
+# source _ destination _ lists
 df = pd.read_csv ("sorted_merged_packets.csv", dtype = str )
 new_df = df.iloc [ : , 2:6 ]
 src_dest_lists = new_df.values.tolist()
@@ -47,7 +47,7 @@ for l in src_dest_lists:
         uniq_comm_sets.append(set_of_l)
         uniq_comm_lists.append(l)
 
-# time stamops of the unique communications
+# time stamps of the unique communications
 time_stamps = { } 
 for comm in uniq_comm_lists: 
    new_key = uniq_comm_lists.index(comm)

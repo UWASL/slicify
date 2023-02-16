@@ -8,98 +8,109 @@ import subprocess
 import socket
 import pint
 import time 
+import config
 
-process = subprocess.run (['chronyc', '-n', 'sourcestats'], capture_output=True)
-time_offset = process.stdout.decode().splitlines()[3]. split()[-2]
-reg = pint.UnitRegistry()
-offset = reg(time_offset).to("s").magnitude
-
-
-
-process = subprocess.run(['netstat', '-ant'], capture_output=True)
-report = process.stdout.decode().splitlines()
-#with open('blah.txt', 'w') as out_file:
-   #for item in report:
-#         # write each item on a new line
-        #out_file.write("%s\n" % item)
-#print('Done')      
-
+iface_name = config.iface_name     #'enp6s0f0'
+filter_string = config.filter_string  #'tcp || udp && ip && tcp port not 443 && udp port not 123'
+hostname = socket.gethostname().split(".")[0]
+filename = f'{hostname}_captured_packets.csv' 
+destination = config.destination #'node0:/users/seba/logs'    # node1:~/
+time_offset = ''
 tcp_ports = set()
-for i in report[2:]:
-       #print("Line:", i, i.split()[3].split(".")[-1])
-       tcp_ports.add(i.split()[3].split(":")[-1])
-#for port in tcp_ports:
-   #print ( 'tcp port' , port , '  ')
-# with open('blah2.txt', 'w') as out_file:
-#    for i in tcp_ports:
-#         out_file.write("%s\n" % i)
-#    print('Done')     
-
-
-process = subprocess.run(['netstat', '-anu'], capture_output=True)
-report = process.stdout.decode().splitlines()
 udp_ports = set()
-for i in report[2:]:
-         udp_ports.add(i.split()[3].split(":")[-1])
-        
-#     #return ports
-#for port in udp_ports:
-   #print ( 'udp port' ,port , '  ')
+packets = set()
 
 
+def  get_offset(): 
+ global time_offset
+ process = subprocess.run (['chronyc', '-n', 'sourcestats'], capture_output=True)
+ time_offset = process.stdout.decode().splitlines()[3]. split()[-2]
+ reg = pint.UnitRegistry()
+ offset = reg(time_offset).to("s").magnitude
+ return time_offset
 
-# #iface_name = input("Enter interface name")
-iface_name = 'enp6s0f0'
 
-filter_string = 'tcp || udp && ip && tcp port not 443 && udp port not 123'
+def get_tcp_open_ports():
+ process = subprocess.run(['netstat', '-ant'], capture_output=True)
+ report = process.stdout.decode().splitlines()
+ for i in report[2:]:
+       tcp_ports.add(i.split()[3].split(":")[-1])
+ return tcp_ports
 
-for port in udp_ports:
+
+def get_udp_open_ports():
+ process = subprocess.run(['netstat', '-anu'], capture_output=True)
+ report = process.stdout.decode().splitlines()
+ for i in report[2:]:
+        udp_ports.add(i.split()[3].split(":")[-1])       
+ return udp_ports
+
+
+def generate_capturing_filter():
+  global filter_string      
+  for port in udp_ports:
         if(port == "*"):
               continue 
         filter_string += ' && udp port not ' + str(port) + ' '
 
-for port in tcp_ports:
+  for port in tcp_ports:
          if(port == "*"):
                  continue 
          filter_string += '&& tcp port not ' + str(port) + ' '
+  return filter_string
 
-# print( filter_string )
-capture = pyshark.LiveCapture(
+
+
+
+def capture():
+  capture = pyshark.LiveCapture(
     interface=iface_name,
-    bpf_filter=filter_string
- )
+    bpf_filter=filter_string)
+ 
 
-
-packets = set()
-for packet in capture.sniff_continuously():
-
-        if hasattr(packet, 'tcp'):
+  for packet in capture.sniff_continuously():
+      if hasattr(packet, 'tcp'):
 #             ts = packet.sniff_timestamp
 #             ts = f"{ts.split('.')[0][-3:]}.{ts.split('.')[-1]}" # avoid rounding floats and losing percision
 #             ts = float(ts) + offset
 #             ts = str(ts)
             packets.add(  packet.sniff_timestamp + ',' + time_offset + ',' + packet.ip.src + ',' + str(packet.tcp.srcport)+ ',' +packet.ip.dst + ',' + str (packet.tcp.dstport))
             #print('just arrived TCP packet ', packet.sniff_timestamp , 'source ip:' ,packet.ip.src , 'tcp source port:' ,packet.tcp.srcport,' dest ip:' ,packet.ip.dst , ' tcp dest port:' ,packet.tcp.dstport)
-        if hasattr(packet, 'udp'):
+      if hasattr(packet, 'udp'):
 #             ts = packet.sniff_timestamp
 #             ts = f"{ts.split('.')[0][-3:]}.{ts.split('.')[-1]}" # avoid rounding floats and losing percision
 #             ts = float(ts) + offset
 #             ts = str(ts)
            packets.add( packet.sniff_timestamp + ',' + time_offset + ',' +packet.ip.src + ',' + str(packet.udp.srcport) + ',' + packet.ip.dst  + ',' + str(packet.udp.dstport))
            #print('just arrived UDP packet ', packet.sniff_timestamp ,'source ip:' ,packet.ip.src , 'udp source port:' ,packet.udp.srcport,' dest ip:' ,packet.ip.dst , ' udp dest port:' ,packet.udp.dstport)
-        if (packet.ip.src == "10.10.1.1" ):
+      if (packet.ip.src == "10.10.1.1" ):
             break 
+  return packets
 
-hostname = socket.gethostname().split(".")[0]
-filename = f'{hostname}_captured_packets.csv' 
-with open(filename, 'w') as out_file:
+def write_captured_packets():
+ with open(filename, 'w') as out_file:
   for packet in packets:
         if ('10.10.1.1' not in packet):
             out_file.write("%s\n" % packet)
         
        
 
+def send_captured_packets(): #send captured packets to node0
+   subprocess.run(['scp', '-i', '/users/seba/.ssh/id_rsa', '-o','StrictHostKeyChecking=no', filename, destination ])	
 
-destination = 'node0:/users/seba/logs'    # node1:~/
-subprocess.run(['scp', filename, destination ])	
 
+# call functions
+
+if __name__ == '__main__':
+    get_offset()
+    get_tcp_open_ports()
+    #for port in tcp_ports:
+        #print('tcp port' , port , '  ')
+    get_udp_open_ports()
+    #for port in udp_ports:
+        #print ( 'udp port' ,port , '  ')
+    generate_capturing_filter()
+    #print( filter_string )
+    capture()
+    write_captured_packets()
+    send_captured_packets()

@@ -1,19 +1,23 @@
 import socket
+import sys
+
+
+# run this script on server side using this command python3 socket_server.py port_number 
+# example: python3 socket_server.py 6000
+
 
 
 def server_program():
-    # get the hostname
-    #host = socket.gethostname()
-    host = '0.0.0.0'
-    port = 7000  # initiate port no above 1024
+    host = '0.0.0.0' #server on local host
+    port = int(sys.argv[1])  # pass port no above 1024
 
     print("Running on host and port:", host, port)
 
 
-    # server_socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )  # get instance
-    server_socket = socket.socket()  # get instance
+    # Create a TCP/IP socket
+    server_socket = socket.socket(socket.AF_INET , socket.SOCK_STREAM)  # get instance
 
-    # look closely. The bind() function takes tuple as argument
+    #The bind() function takes tuple as argument
     server_socket.bind((host, port))  # bind host address and port together
 
     # configure how many client the server can listen simultaneously
@@ -27,7 +31,6 @@ def server_program():
             # if data is not received break
             break
         print("from connected user: " + str(data))
-        # data = input(' -> ')
         conn.send(data.encode())  # send data to the client
 
     conn.close()  # close the connection
