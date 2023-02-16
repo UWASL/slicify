@@ -15,6 +15,7 @@ filter_string = config.filter_string  #'tcp || udp && ip && tcp port not 443 && 
 hostname = socket.gethostname().split(".")[0]
 filename = f'{hostname}_captured_packets.csv' 
 destination = config.destination #'node0:/users/seba/logs'    # node1:~/
+id_rsa_location = config.id_rsa_location 
 time_offset = ''
 tcp_ports = set()
 udp_ports = set()
@@ -96,7 +97,7 @@ def write_captured_packets():
        
 
 def send_captured_packets(): #send captured packets to node0
-   subprocess.run(['scp', '-i', '/users/seba/.ssh/id_rsa', '-o','StrictHostKeyChecking=no', filename, destination ])	
+   subprocess.run(['scp', '-i', id_rsa_location, '-o','StrictHostKeyChecking=no', filename, destination ])	
 
 
 # call functions
