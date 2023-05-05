@@ -3,17 +3,12 @@ import pathlib
 import pandas as pd 
 import time
 import csv
-import config
+import user_config
 
-logs_path = config.logs_path
+logs_path = user_config.App_path + '/logs'
 file_list = os.listdir(logs_path)
 
-# while len(address_list) == len(file_list):
-
-    #file_list = os.listdir(path)
    
-    
-
 os.chdir(logs_path)
 # Open file3 in write mode to merge all packets
 with open('merged_packets.csv', 'w') as outfile:
@@ -57,7 +52,7 @@ for comm in uniq_comm_lists:
 
 # final outtput [ src address ,  port number, dest address , port number, starting time, 
 # offset of starting time, ending time, offset of ending time ]
-with open('final.txt', 'w') as outfile:
+with open('final_logs.txt', 'w') as outfile:
     for key in time_stamps.keys():
         new_entry = uniq_comm_lists[key]
         time_index = time_stamps.get(key)

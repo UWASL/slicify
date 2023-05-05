@@ -1,36 +1,30 @@
 import os, re
 import subprocess
-import config
+import user_config
 
-
+id_rsa_location = user_config.id_rsa_location
 full_results = [re.findall('^[\w\?\.]+|(?<=\s)\([\d\.]+\)|(?<=at\s)[\w\:]+', i) for i in os.popen('arp -a')]
-nodes_ip = []
-nodes = []
+nodes_ip = user_config.nodes_ip
+nodes = user_config.nodes
 
-# listting all the nodes ip addresses and hostnames
-for l in full_results:
-    if ((l[0] != '?') and (l[0]!= 'control')):
-        nodes_ip.append(l[1][1:-1])
-        nodes.append(l[0])
+
 
 # writing hosts.txt
 with open("hosts.txt", 'w') as out_file:
   for ip in nodes_ip:
     out_file.write("%s\n" % ip)
 
-# remove the old content in logs in node0
-subprocess.run(['rm', '/users/seba/node0/logs/*'])
 
-#come back delete this
-for node in nodes:
-    print(node)
-    destination =  node + ':/users/seba'    # node1:/users/seba
-    #subprocess.run( ['ssh', node, 'cd','/var/tmp', 'rm', '-r', '*'] )
-    subprocess.run(['scp','node0:/users/seba/network_nodes/capture_new.py', destination ])
-    subprocess.run(['scp','node0:/users/seba/node0/config.py', destination ])
-    #subprocess.call("ssh seba@" + node + " rm *_captured_packets.csv", shell=True)
-    
-# run capture_new.py on all nodes    
-subprocess.run(['parallel-ssh', '-i', '-h', 'hosts.txt', '-t', '0', 'sudo', 'python3.7', 'capture_new.py', '&'])
+
+# run pre_capture.py on all nodes    
+subprocess.run(['parallel-ssh', '-i', '-h', 'hosts.txt', '-t', '0','python3.7', 'pre_capture.py'])
+print('Done pre capturing')
+
+
+
+#run capture_new.py on all nodes 
+print('capture started') 
+open('flag.txt', 'w')  
+subprocess.run(['parallel-ssh', '-i', '-h', 'hosts.txt', '-t', '0', 'sudo', 'python3.7', 'capture.py', '&'])
 
 
