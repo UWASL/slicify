@@ -13,5 +13,9 @@ sudo python3.7 -m pip install psutil
 sudo pip3 install psutil 
 sudo apt install python3-numpy
 sudo apt install python3-pandas
+sudo apt install screen
 sudo apt install chrony -y
 sudo systemctl start chronyd
+
+
+
