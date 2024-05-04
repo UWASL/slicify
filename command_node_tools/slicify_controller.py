@@ -18,6 +18,12 @@ def controller_main():
     sut_control_module.setup_sut_dependencies()
     sut_control_module.install_sut()
 
+    # Run test cases
+
+    for test_key, run_cmd in sut_config.run_program_commands.items():
+        print("Running test: ", test_key)
+        subprocess.call(run_cmd, shell=True)
+
 
 if(__name__ == "__main__"):
     controller_main()
