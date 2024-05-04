@@ -9,6 +9,11 @@ def deploy_slicify_on_all_nodes():
     id_rsa_location = slicify_config.id_rsa_location
     nodes = slicify_config.cluster_nodes
 
+    # Copy id_rsa to all nodes
+    for node in nodes:
+        id_rsa_destination = node + ":" + os.path.split(slicify_config.id_rsa_location)[0]
+        subprocess.run(['scp', '-r', '-i', id_rsa_location, '-o','StrictHostKeyChecking=no',slicify_config.id_rsa_location,  id_rsa_destination])
+
     # Copy slicify internal tools to each node 
     for node in nodes:
         print("Copying slicify to", node)

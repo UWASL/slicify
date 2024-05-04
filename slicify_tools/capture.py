@@ -5,28 +5,25 @@ import pyshark
 import subprocess
 import socket
 import pint
-import config
+import capture_config as config
 import os
-import command_node_tools.config_files.sut_config as sut_config
-import command_node_tools.config_files.slicify_config as slicify_config
 
-
-
-iface_name = slicify_config.iface_name     #'enp6s0f0'
+iface_name = config.iface_name     #'enp6s0f0'
 filter_string = config.filter_string  #'tcp || udp && ip && tcp port not 443 && udp port not 123'
 hostname = socket.gethostname().split(".")[0]
 filename = f'{hostname}_captured_packets.csv' 
 
-destination = os.path.join(slicify_config.comm_logs_path) #'node0:/users/seba/logs'  
+destination = os.path.join(config.comm_logs_path) #'node0:/users/seba/logs'  
 
-id_rsa_location = slicify_config.id_rsa_location 
+id_rsa_location = config.id_rsa_location 
 capture_filter_filename = config.capture_filter_filename
 time_offset = ''
 tcp_ports = set()
 udp_ports = set()
 packets = set()
-logs_destination = destination
-master_node_ip = slicify_config.command_node_ip
+master_node_ip = config.command_node_ip
+remote_logs_destination = config.user_name + "@" + master_node_ip + ": " + destination
+
 
 
 def  get_offset(): 
@@ -78,7 +75,7 @@ def capture():
 
 def write_captured_packets():
  master_ip = ',' + master_node_ip + ','
- with open(filename, 'w') as out_file:
+ with open(os.path.join(destination, filename), 'w') as out_file:
   for packet in packets:
         if (master_ip not in packet):
           out_file.write("%s\n" % packet)
@@ -86,12 +83,13 @@ def write_captured_packets():
        
 
 def send_captured_packets(): #send captured packets to node0
-   subprocess.run(['scp', '-i', id_rsa_location, '-o','StrictHostKeyChecking=no', filename, logs_destination ])	
+   subprocess.run(['scp', '-i', id_rsa_location, '-o','StrictHostKeyChecking=no', os.path.join(destination, filename), remote_logs_destination])	
 
 
 # call functions
 
 if __name__ == '__main__':
+    print("Running capture.py")
     get_offset()
     read_capture_filter()
     capture()

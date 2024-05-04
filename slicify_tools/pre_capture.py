@@ -1,5 +1,5 @@
 import subprocess
-import config
+import capture_config as config
 
 filter_string = config.filter_string
 capture_filter_filename = config.capture_filter_filename
