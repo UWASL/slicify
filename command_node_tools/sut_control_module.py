@@ -1,7 +1,7 @@
 import os, time
 import subprocess
-import command_node_tools.config_files.slicify_config as slicify_config
-import command_node_tools.config_files.sut_config as sut_config
+import config_files.slicify_config as slicify_config
+import config_files.sut_config as sut_config
 
 sut_setup_commands = sut_config.setup_commands
 sut_tests = sut_config.run_program_commands
@@ -11,24 +11,36 @@ sut_cleanup_commands = sut_config.clean_up_commands
 
 id_rsa_location = slicify_config.id_rsa_location
 
-def setup_sut_dependencies(node_ip):
+def setup_sut_dependencies_single_node(node_ip):
     """
         @brief: Setup SUT dependencies on a single node using the script within sut_tools/
     """
 
     # Grab SSH key and node list from user_config
-    id_rsa_location = sut_config.id_rsa_location
+    id_rsa_location = slicify_config.id_rsa_location
     
     print("Setting up SUT dependencies on ", node_ip)
-    destination =  node_ip + ':' + slicify_config.slicify_root_dir   
-
-    # Copy SUT Tools to node
-    subprocess.run(['scp','-i', id_rsa_location, '-o','StrictHostKeyChecking=no', os.path.join(slicify_config.slicify_root_dir, sut_config.sut_tools_dir), destination ])
+    destination =  node_ip + ':' + sut_config.sut_dir
+    
+    # Remove old SUT directory if it exists
+    subprocess.run ([ 'ssh', node_ip, '-i', id_rsa_location,'-o','StrictHostKeyChecking=no','&&', 'rm -rf', sut_config.sut_dir ])
+    
+    # Copy SUT directory to node
+    subprocess.run(['scp', '-r', '-i', id_rsa_location, '-o','StrictHostKeyChecking=no', sut_config.sut_dir, destination ])
 
     # Run script to setup dependencies from SUT tools
-    subprocess.run ([ 'ssh', node_ip, '-i', id_rsa_location,'-o','StrictHostKeyChecking=no','&&', 'cd' , os.path.join(slicify_config.slicify_root_dir, sut_config.sut_tools_dir), '&&', './setup_sut_dependencies.sh' ])
+    subprocess.run ([ 'ssh', node_ip, '-i', id_rsa_location,'-o','StrictHostKeyChecking=no','&&', 'cd' , os.path.join(sut_config.sut_dir, sut_config.sut_tools_dir), '&&', './setup_sut_dependencies.sh' ])
     
     print("SUT dependencies succesfully set up on", node_ip)
+
+def setup_sut_dependencies():
+    """
+        @brief: Setup SUT dependencies on all cluster nodes
+    """
+
+    for node_ip in slicify_config.cluster_nodes:
+        setup_sut_dependencies_single_node(node_ip)
+
 
 def install_sut():
     """
@@ -41,7 +53,6 @@ def install_sut():
         for node, command in sut_setup_commands.items():
             if(node == node_ip):
                 subprocess.run(['ssh', node_ip ,'-i', id_rsa_location,'-o','StrictHostKeyChecking=no','&&', command ])
-                time.sleep(15)
     
 def run_sut_test(test_key):
     """

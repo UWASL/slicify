@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-import os, re
+import os
 import subprocess
-import sys
 import config_files.slicify_config as slicify_config
 import config_files.sut_config as sut_config
 
@@ -12,11 +11,11 @@ def deploy_slicify_on_all_nodes():
 
     # Copy slicify internal tools to each node 
     for node in nodes:
-        print("Copying slicify_tools to", node)
+        print("Copying slicify to", node)
         
         subprocess.run ([ 'ssh', node, '-i', id_rsa_location,'-o','StrictHostKeyChecking=no','&&', 'mkdir' , slicify_config.slicify_root_dir ])
-        destination =  node + ":" + slicify_config.slicify_root_dir + "/"    # node1:~/
-        subprocess.run(['scp', '-r', '-i', id_rsa_location, '-o','StrictHostKeyChecking=no',os.path.join(slicify_config.slicify_root_dir, slicify_config.slicify_tools_dir), destination ])
+        destination =  node + ":" + slicify_config.slicify_root_dir + "/../"    # node1:~/
+        subprocess.run(['scp', '-r', '-i', id_rsa_location, '-o','StrictHostKeyChecking=no',slicify_config.slicify_root_dir, destination ])
 
     # Setup command node - This script is assumed to be running on the command node
     subprocess.call("cd " + os.path.join(slicify_config.slicify_root_dir, slicify_config.slicify_tools_dir) + "&& ./setup_command_node.sh", shell=True)

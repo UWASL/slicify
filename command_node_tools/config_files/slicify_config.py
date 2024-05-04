@@ -7,9 +7,8 @@ import os
 # TODO
 # Modify root dir path to match actual destination
 slicify_root_dir = "/users/s2udayas/slicify/"
-
 slicify_tools_dir = "slicify_tools"
-sut_tools_dir = "sut_tools"
+
 comm_logs_path = os.path.join(slicify_root_dir, "comm_logs")
 
 # Filter string used when capturing packets
@@ -32,9 +31,6 @@ capture_filter_filename = f'capture_filter'
 iface_name = 'enp6s0f0'
 id_rsa_location = '/users/s2udayas/.ssh/id_rsa'
 
-App_path = ''
-App_destination = ''
-
 command_node_ip = '10.10.1.1'
-cluster_nodes = ['node1', 'node2']
-cluster_nodes_ip = ['10.10.1.2', '10.10.1.3']
+cluster_nodes = ['node1', 'node2', 'node3']
+cluster_nodes_ip = ['10.10.1.2', '10.10.1.3', '10.10.1.4']
