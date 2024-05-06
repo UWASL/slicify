@@ -7,10 +7,10 @@ sudo apt install -y python3-dev
 sudo dpkg --configure -a
 echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install tshark
-sudo python3 -m pip install pyshark 
-sudo python3 -m pip install pint
-sudo python3 -m pip install psutil
-sudo pip3 install psutil 
+python3 -m pip install pyshark 
+python3 -m pip install pint
+python3 -m pip install psutil
+pip3 install psutil 
 sudo apt install -y pssh
 sudo apt install -y python3-numpy
 sudo apt install -y python3-pandas

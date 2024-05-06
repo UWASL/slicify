@@ -10,7 +10,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -y install tshark
 sudo python3 -m pip install pyshark
 sudo python3 -m pip install pint
 sudo python3 -m pip install psutil
-sudo pip3 install psutil 
+pip3 install psutil 
 sudo apt install -y python3-numpy
 sudo apt install -y python3-pandas
 sudo apt install -y screen
