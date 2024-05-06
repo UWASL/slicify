@@ -155,13 +155,36 @@ def merge_logs():
             new_entry.append(df.iloc[ending_time_index,1])
             outfile.write("%s\n" % new_entry)
 
-def run_test_and_capture(test_key):
-    # Measure fault-free execution time
-    elapsed_time = sut_control_module.measure_test_runtime(test_key)
+def read_final_merged_log():
+    """
+        Read final merged logs to obtain unique pairs of communicating nodes
+    """
+    with open(os.path.join(slicify_config.comm_logs_path, 'final_unique_comms.txt'), 'r') as infile:
+        file_lines = infile.readlines()
+        comm_list = []
 
+        for line in file_lines:
+            ip_set = []
+            ip_set.append((line.split()[0][2:-2]))
+            ip_set.append((line.split()[2][1:-2]))
+            comm_list.append(ip_set)
+            uniq_comm_sets  = [set(comm_list[0])] 
+            uniq_comm_lists = [comm_list[0]]
+            for ip_set in comm_list:
+                set_of_ip_set = set(ip_set) 
+                if set_of_ip_set not in uniq_comm_sets:
+                    uniq_comm_sets.append(set_of_ip_set)
+                    uniq_comm_lists.append(ip_set)
+    return uniq_comm_lists
+
+def run_test_and_capture(test_key, elapsed_time):
+    
     # Run pre-capture and create filters
     pre_capture_phase()
 
+    # Kill old SUT programs if any
+    sut_control_module.stop_sut()
+    
     # Run test with capture
     capture_connections()
     sut_control_module.run_sut_test(test_key)
@@ -169,6 +192,7 @@ def run_test_and_capture(test_key):
     stop_capture()
 
     time.sleep(5)
+    sut_control_module.stop_sut()   
 
     # Merge communication logs
     merge_logs()
