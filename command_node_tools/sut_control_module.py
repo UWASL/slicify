@@ -67,7 +67,7 @@ def run_sut_test(test_key):
     # Run unit test
     subprocess.call(sut_tests[test_key], shell=True)
 
-def verify_test_result(test_key):
+def verify_test_results(test_key, test_log_dir_path):
     """
         @brief: Verify one test case result (pointed to by test_key)
     """
@@ -75,7 +75,7 @@ def verify_test_result(test_key):
     global sut_verify
 
     # Verify unit test result
-    subprocess.call(sut_verify[test_key], shell=True)
+    subprocess.call(sut_verify[test_key] + " " + test_key + " " + test_log_dir_path, shell=True)
 
 def collect_logs(test_key):
     """

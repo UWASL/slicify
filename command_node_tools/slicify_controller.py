@@ -87,12 +87,14 @@ def controller_main():
             test_log_dest = os.path.join(test_log_rootdir_path, "test_" + str(test_key) + "_partial_" + str(node_pair[0]) + "_" + str(node_pair[1]))
             os.mkdir(test_log_dest)
             sut_control_module.copy_logs_to_dest(test_log_dest)
-    
-        # test_log_rootdir_path = os.path.join(sut_config.sut_test_logs_path, test_key)
-        # test_log_dest = os.path.join(test_log_rootdir_path, "test_" + str(test_key) + "_partial_" + str("test1"))
-        # os.mkdir(test_log_dest)
-        # sut_control_module.copy_logs_to_dest(test_log_dest)       
 
+            print("Verifying test results:")
+            sut_control_module.verify_test_results("1WayComms", test_log_dest)
+
+
+        
+    
+        
 
 if(__name__ == "__main__"):
     controller_main()

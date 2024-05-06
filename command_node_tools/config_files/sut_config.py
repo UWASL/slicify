@@ -49,7 +49,8 @@ clean_up_commands = {
 
 # Test result verification commands
 verification_commands = {
-
+    "1WayComms": os.path.join(sut_tools_full_path, "verify_results.py"),
+    "3WayComms": os.path.join(sut_tools_full_path, "verify_results.py")
 }
     
 # Path to application logs
