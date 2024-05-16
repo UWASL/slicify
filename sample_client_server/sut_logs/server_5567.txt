@@ -1,0 +1,3 @@
+Running on host and port: 10.10.1.3 5567
+Connection from: ('10.10.1.2', 37192)
+Received Message: TestMessag
