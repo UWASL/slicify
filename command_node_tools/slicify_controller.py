@@ -16,11 +16,11 @@ import signal_module
 def controller_main():
 
     # Deploy slicify across all cluster nodes
-    # slicify_deployment.deploy_slicify_on_all_nodes()
+    slicify_deployment.deploy_slicify_on_all_nodes()
 
     # # Deploy and install SUT
-    # sut_control_module.setup_sut_dependencies()
-    # sut_control_module.install_sut()
+    sut_control_module.setup_sut_dependencies()
+    sut_control_module.install_sut()
 
     # Run test cases
 
